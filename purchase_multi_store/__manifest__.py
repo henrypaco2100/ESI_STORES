@@ -1,0 +1,17 @@
+# -*- coding: utf-8 -*-
+{'name': 'Multi Store for Purchase',
+ 'version': '13.0.2.0.0',
+ 'category': 'Accounting',
+ 'sequence': 14,
+ 'summary': '',
+ 'author': 'ESI - Especialistas en Sistemas Integrados',
+ 'website': 'https://esibolivia.store',
+ 'license': 'AGPL-3',
+ 'images': [],
+ 'depends': ['purchase_stock', 'base_multi_store', 'stock_multi_store'],
+ 'data': ['views/purchase_order_views.xml', 'security/multi_store_security.xml'],
+ 'demo': [],
+ 'installable': True,
+ 'auto_install': True,
+ 'application': False,
+ 'maintainer': 'ESI - Especialistas en Sistemas Integrados'}
