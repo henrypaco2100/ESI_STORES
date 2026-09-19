@@ -1,5 +1,5 @@
 {'name': 'ESI - Tipo de Ventas por Sucursal',
- 'version': '13.0.1.0.0',
+ 'version': '13.0.1.1.0',
  'summary': 'Integra Tipo de Ventas con Multi Store',
  'author': 'ESI - Especialistas en Sistemas Integrados',
  'maintainer': 'ESI - Especialistas en Sistemas Integrados',

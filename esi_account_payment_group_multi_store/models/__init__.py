@@ -1,3 +1,2 @@
-from . import account_payment_group
-from . import account_payment
-from . import res_store
+# -*- coding: utf-8 -*-
+# Sin modelos: compatibilidad histórica del nombre técnico.

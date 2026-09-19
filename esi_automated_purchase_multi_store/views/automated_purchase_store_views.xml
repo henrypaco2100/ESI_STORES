@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="esi_bi_automated_purchase_order.form_automate_purchase_order_workflow"/>
         <field name="arch" type="xml">
             <field name="name" position="after">
-                <field name="store_id" required="1" domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]"/>
+                <field name="store_id" domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]"/>
             </field>
             <field name="st_almacen" position="attributes">
                 <attribute name="domain">[('company_id', '=', company_id), ('store_id', '=', store_id)]</attribute>

@@ -7,7 +7,7 @@ class AutomatedPurchaseStore(models.Model):
     _inherit = 'automated.purchase'
 
     store_id = fields.Many2one(
-        'res.store', string='Sucursal', required=True,
+        'res.store', string='Sucursal',
         default=lambda self: self.env.user.store_id if self.env.user.store_id else False,
     )
 
@@ -58,12 +58,13 @@ class PurchaseOrderStore(models.Model):
 
     @api.model
     def _esi_store_purchase_type_domain(self):
-        domain = [('company_id', '=', self.env.user.company_id.id), ('active', '=', True)]
+        domain = ['&', ('active', '=', True), '|',
+                  ('company_id', '=', False), ('company_id', '=', self.env.user.company_id.id)]
         user = self.env.user
         if user.store_id:
-            domain.append(('store_id', 'child_of', [user.store_id.id]))
+            domain += ['|', ('store_id', '=', False), ('store_id', 'child_of', [user.store_id.id])]
         elif user.store_ids:
-            domain.append(('store_id', 'in', user.store_ids.ids))
+            domain += ['|', ('store_id', '=', False), ('store_id', 'in', user.store_ids.ids)]
         return domain
 
     @api.model
@@ -89,11 +90,10 @@ class PurchaseOrderStore(models.Model):
         res = super()._esi_validate_purchase_type()
         for order in self:
             purchase_type = order.work_process_order_id
-            if not purchase_type.store_id:
-                raise UserError(_('El Tipo de Compra debe tener una Sucursal configurada.'))
-            if purchase_type.st_almacen.store_id != purchase_type.store_id:
+            if purchase_type.store_id and purchase_type.st_almacen and purchase_type.st_almacen.store_id != purchase_type.store_id:
                 raise UserError(_('El almacén del Tipo de Compra no corresponde a su Sucursal.'))
-            for journal in (purchase_type.purchase_journal, purchase_type.payment_journal):
-                if journal.store_id and journal.store_id != purchase_type.store_id:
-                    raise UserError(_('Los diarios del Tipo de Compra deben corresponder a la misma sucursal.'))
+            if purchase_type.store_id:
+                for journal in (purchase_type.purchase_journal, purchase_type.payment_journal):
+                    if journal and journal.store_id and journal.store_id != purchase_type.store_id:
+                        raise UserError(_('Los diarios del Tipo de Compra deben corresponder a la misma sucursal.'))
         return res

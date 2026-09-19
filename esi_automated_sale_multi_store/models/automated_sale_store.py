@@ -7,7 +7,7 @@ class AutomatedSaleStore(models.Model):
     _inherit = 'automated.sale'
 
     store_id = fields.Many2one(
-        'res.store', string='Sucursal', required=True,
+        'res.store', string='Sucursal',
         default=lambda self: self.env.user.store_id if self.env.user.store_id else False,
     )
 
@@ -56,12 +56,13 @@ class SaleOrderStore(models.Model):
 
     @api.model
     def _esi_store_sale_type_domain(self):
-        domain = [('company_id', '=', self.env.user.company_id.id), ('active', '=', True)]
+        domain = ['&', ('active', '=', True), '|',
+                  ('company_id', '=', False), ('company_id', '=', self.env.user.company_id.id)]
         user = self.env.user
         if user.store_id:
-            domain.append(('store_id', 'child_of', [user.store_id.id]))
+            domain += ['|', ('store_id', '=', False), ('store_id', 'child_of', [user.store_id.id])]
         elif user.store_ids:
-            domain.append(('store_id', 'in', user.store_ids.ids))
+            domain += ['|', ('store_id', '=', False), ('store_id', 'in', user.store_ids.ids)]
         return domain
 
     @api.model
@@ -87,11 +88,10 @@ class SaleOrderStore(models.Model):
         res = super()._esi_validate_sale_type()
         for order in self:
             sale_type = order.work_process_order_id
-            if not sale_type.store_id:
-                raise UserError(_('El Tipo de Venta debe tener una Sucursal configurada.'))
-            if sale_type.st_almacen.store_id != sale_type.store_id:
+            if sale_type.store_id and sale_type.st_almacen and sale_type.st_almacen.store_id != sale_type.store_id:
                 raise UserError(_('El almacén del Tipo de Venta no corresponde a su Sucursal.'))
-            for journal in (sale_type.sales_journal, sale_type.payment_journal):
-                if journal.store_id and journal.store_id != sale_type.store_id:
-                    raise UserError(_('Los diarios del Tipo de Venta deben corresponder a la misma sucursal.'))
+            if sale_type.store_id:
+                for journal in (sale_type.sales_journal, sale_type.payment_journal):
+                    if journal and journal.store_id and journal.store_id != sale_type.store_id:
+                        raise UserError(_('Los diarios del Tipo de Venta deben corresponder a la misma sucursal.'))
         return res
